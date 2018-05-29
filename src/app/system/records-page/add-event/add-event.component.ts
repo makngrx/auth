@@ -5,8 +5,8 @@ import * as moment from 'moment';
 import { Category } from '../../shared/models/category.model';
 import { WFMEvent } from '../../shared/models/event.model';
 import { EventsService } from '../../shared/services/events.service';
-import { BillService } from '../../shared/services/bill.service';
-import { Bill } from '../../shared/models/bill.model';
+
+
 import { Message } from '../../../shared/models/message.model';
 import { Subscription } from 'rxjs/Subscription';
 
@@ -28,8 +28,7 @@ export class AddEventComponent implements OnInit, OnDestroy {
 
   message: Message;
 
-  constructor(private eventsService: EventsService,
-              private billService: BillService) {
+  constructor(private eventsService: EventsService) {
   }
 
   ngOnInit() {
@@ -50,31 +49,7 @@ export class AddEventComponent implements OnInit, OnDestroy {
       moment().format('DD.MM.YYYY HH:mm:ss'), description
     );
 
-    this.sub1 = this.billService.getBill()
-      .subscribe((bill: Bill) => {
-        let value = 0;
-        if (type === 'outcome') {
-          if (amount > bill.value) {
-            this.showMessage(`На счету недостаточно средств. Вам нехватает ${amount - bill.value}`);
-            return;
-          } else {
-            value = bill.value - amount;
-          }
-        } else {
-          value = bill.value + amount;
-        }
 
-        this.sub2 = this.billService.updateBill({value, currency: bill.currency})
-          .mergeMap(() => this.eventsService.addEvent(event))
-          .subscribe(() => {
-            form.setValue({
-              amount: 0,
-              description: ' ',
-              category: 1,
-              type: 'outcome'
-            });
-          });
-      });
   }
 
   ngOnDestroy() {
