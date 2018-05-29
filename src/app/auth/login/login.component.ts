@@ -1,16 +1,19 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
+import { Meta, Title } from '@angular/platform-browser';
 
 import { UsersService } from '../../shared/services/users.service';
 import { User } from '../../shared/models/user.model';
 import { Message } from '../../shared/models/message.model';
 import { AuthService } from '../../shared/services/auth.service';
+import { fadeStateTrigger } from '../../shared/animations/fade.animation';
 
 @Component({
   selector: 'wfm-login',
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  styleUrls: ['./login.component.scss'],
+  animations: [fadeStateTrigger]
 })
 export class LoginComponent implements OnInit {
 
@@ -20,7 +23,15 @@ export class LoginComponent implements OnInit {
   constructor(private usersService: UsersService,
               private authService: AuthService,
               private router: Router,
-              private route: ActivatedRoute) {
+              private route: ActivatedRoute,
+              private title: Title,
+              private meta: Meta
+  ) {
+    title.setTitle('Вход в систему');
+    meta.addTags([
+      { name: 'keywords', content: 'login,  system' },
+      { name: 'description', content: 'Login page' }
+    ]);
   }
 
   ngOnInit() {
@@ -30,8 +41,13 @@ export class LoginComponent implements OnInit {
       .subscribe((params: Params) => {
         if (params['nowCanLogin']) {
           this.showMessage({
-            text: 'Теперь вы можете зайти в систему',
+            text: 'Now you can login',
             type: 'success'
+          });
+        } else if (params['accessDenied']) {
+          this.showMessage({
+            text: 'To work with the system you need to login',
+            type: 'warning'
           });
         }
       });
@@ -60,16 +76,16 @@ export class LoginComponent implements OnInit {
             this.message.text = '';
             window.localStorage.setItem('user', JSON.stringify(user));
             this.authService.login();
-            // this.router.navigate(['']);
+            this.router.navigate(['/system', 'history']);
           } else {
             this.showMessage({
-              text: 'Пароль не верный',
+              text: 'Wrong password',
               type: 'danger'
             });
           }
         } else {
           this.showMessage({
-            text: 'Такого пользователя не существует',
+            text: 'This user does not exist',
             type: 'danger'
           });
         }
